@@ -1,9 +1,0 @@
-LICENSE
-README.md
-setup.cfg
-setup.py
-src/KamTube.egg-info/PKG-INFO
-src/KamTube.egg-info/SOURCES.txt
-src/KamTube.egg-info/dependency_links.txt
-src/KamTube.egg-info/requires.txt
-src/KamTube.egg-info/top_level.txt

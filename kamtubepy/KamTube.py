@@ -3,13 +3,19 @@ from bs4 import BeautifulSoup
 import asyncio
 import json
 from urllib.parse import quote
+from .KamExceptions import DownloadError, SaveError, UrlParserError
 
 
 class KamTube:
-    def __init__(self) -> None:
+    def __init__(self, is_cli: bool=False) -> None:
+        self.is_cli = is_cli
         self.base_api = "https://invidious.namazso.eu/api/v1/"
         self.ytb_trom_url = "https://ytb.trom.tf/watch?v="
         self.ytb_trom_download_url = "https://ytb.trom.tf/latest_version?download_widget="
+
+    async def output(self, content):
+        if self.is_cli:
+            print(content)
     
     async def urlParser(self, url: str) -> str:
         if not url.startswith("https://"):
@@ -46,6 +52,7 @@ class KamTube:
         return json.loads(await self.fetcher(self.base_api + f"videos/{video_id}"))
 
     async def getVideoInfos(self, video_id: str) -> dict:
+        await self.output("[INFO] Downloading webpage...")
         video_id = await self.urlParser(video_id)
         data = await self.fetcher(self.ytb_trom_url + video_id)
         soup = BeautifulSoup(data, "html.parser")
@@ -61,6 +68,7 @@ class KamTube:
     async def getVideoDownloadUrl(self, video_id: str, quality: str="360") -> dict:
         video_id = await self.urlParser(video_id)
         v_data = await self.getVideoInfos(video_id)
+        await self.output("[INFO] Parsing download URL...")
         data = v_data['infos']
         title = v_data['title']
         try:
@@ -68,8 +76,10 @@ class KamTube:
                 if quality in d["quality"]:
                     return {"title": title, "data": self.ytb_trom_download_url + quote(d["urinfo"])}
         except Exception:
-            print("[!] Error while getting download url")
-            return None
+            if self.is_cli:
+                pass
+            else:
+                raise UrlParserError
 
     async def download(self, video_id: str, quality: str="360") -> dict:
         video_id = await self.urlParser(video_id)
@@ -78,28 +88,38 @@ class KamTube:
         url = data['data']
         if url:
             try:
+                await self.output("[INFO] Downloading video...")
                 return {"title": title, "data": requests.get(url).content}
             except Exception:
-                print("[!] Error while downloading")
-                return None
+                if self.is_cli:
+                    await self.output("[Error] while downloading")
+                else:
+                    raise  DownloadError
         else:
-            print("[!] Error while getting download url")
-            return None
+            if self.is_cli:
+                await self.output("[Error] Error while getting download url")
+            else:
+                raise UrlParserError
 
     async def save(self, video_id: str, quality: str="360") -> None:
         video_id = await self.urlParser(video_id)
         data = await self.download(video_id, quality)
+        filename = data['title'] + ".m4a" if quality == "audio" else data['title'] + ".mp4"
         if data:
             try:
-                with open(data['title'] + ".mp4", "wb") as f:
+                with open(filename, "wb") as f:
                     f.write(data["data"])
-                print("[+] Video saved as " + data['title'] + ".mp4")
+                print("[+] Video saved as " + filename)
             except Exception:
-                print("[!] Error while saving")
-                return None
+                if self.is_cli:
+                    await self.output("[Error] Error while saving")
+                else:
+                    raise SaveError
         else:
-            print("[!] Error while downloading")
-            return None
+            if self.is_cli:
+                await self.output("[Error] Error while downloading")
+            else:
+                raise DownloadError
 
     async def getThumbnail(self, video_id: str) -> str:
         video_id = await self.urlParser(video_id)
@@ -110,11 +130,11 @@ class KamTube:
                 return d['url']
         return None
 
-
-def main():
-    kamtube = KamTube()
-    asyncio.run(kamtube.save("HUnnxRicDwM", "audio"))
-
-
 if __name__ == "__main__":
-    main()
+    from .cli import argparser
+    args = argparser()
+    print(args)
+    kamtube = KamTube(is_cli=True)
+    if args['query']:
+        extract = "audio" if args['extract'] else "360"
+        asyncio.run(kamtube.save(asyncio.run(kamtube.search(args['query']))[0]['videoId'], extract))
