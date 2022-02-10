@@ -15,7 +15,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'requests',
-        'beautiful'
+        'beautifulsoup4',
     ],
     long_description=long_description,
     classifiers=[
