@@ -14,4 +14,14 @@ Eg:
 `python3 -m KamTube -x -d never gonna give you up` downloads the song directly
 
 ## Script
-Check EXAMPLE.md
+```py
+from KamTube import KamTube
+import asyncio
+
+async def main():
+    async with KamTube() as downloader:
+        await downloader.save("dQw4w9WgXcQ")
+
+
+asyncio.run(main())
+```
