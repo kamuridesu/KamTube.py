@@ -3,7 +3,7 @@
 Downloads videos from YouTube via Invidious using Python
 
 # Install: 
-    `pip install --user KamTube`
+    python3 -m pip install --user KamTube
 
 # Usage:
 ## CLI
