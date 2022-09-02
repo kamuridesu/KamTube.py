@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, Union
 import logging
 from sys import stdin
@@ -20,6 +21,16 @@ class KamTube:
         self.download_endpoint = "https://ytb.trom.tf/download"
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', filename="kamtube.log")
         self.logger = logging.getLogger(__name__)
+
+    async def __aenter__(self):
+        self.logger.debug("Entering context")
+        await self.session.__aenter__()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, tb):
+        if self.session:
+            self.logger.debug("Exit context")
+            await self.session.__aexit__(exc_type, exc_val, tb)
 
     def cli_log(self, message: str) -> None:
         if self.cli:
@@ -92,7 +103,7 @@ class KamTube:
         body_query: str = urllib.parse.quote(f"id={body['id']}&title={body['title']}&download_widget=", safe='~@#$&()*!+=:;,?/\'') + urllib.parse.quote(body['query'], safe='~()*!\'')
         self.logger.info("Downloading media " + body['title'] + " with query " + body_query)
         try:
-            _bytes = await post(self.session, self.download_endpoint, data=body_query, headers=headers)
+            _bytes = await post(self.session, self.download_endpoint, data=body_query, headers=headers, is_cli=self.cli, title=body['title'])
             if _bytes:
                 if self.cli:
                     await self.close() # Closing session on CLI to avoid hanging session object
@@ -102,7 +113,7 @@ class KamTube:
                     "bytes": _bytes
                 }
         except Exception as e:
-            self.logger.error("Download failed! Reason may be something from " + str(e.__cause__))
+            self.logger.error("Download failed! Reason may be something from " + str(e.__class__))
             raise
     
     async def save(self, media_id: str, media_type: str="mixed", quality: Union[None, int, float]=None) -> str:
@@ -110,15 +121,11 @@ class KamTube:
         extension = response['extension']
         if media_type == "audio":
             extension = "mp3"
-        filename = f"{response['title'].replace('/', '-')}.{extension}"
+        filename = f"{response['title'].replace('/', '-').replace('|', '')}.{extension}"
         self.logger.debug("Saving " + filename)
         with open(filename, "wb") as file:
             file.write(response['bytes'])
         return response['title']
-    
-    # async def __aexit__(self, exc_type, exc_val, exc_tb):
-    #     if self.session:
-    #         return await self.session.__aexit__(exc_type, exc_val, exc_tb)
 
     async def close(self):
         if self.session:

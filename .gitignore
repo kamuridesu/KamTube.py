@@ -10,6 +10,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
+venv/
 build/
 develop-eggs/
 dist/
@@ -69,3 +70,6 @@ target/
 
 *.log
 *server*
+*.mp4
+*.mp3
+*.webm
