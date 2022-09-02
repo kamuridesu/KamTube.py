@@ -13,7 +13,7 @@ def requirements():
 
 
 setup(name="KamTube",
-      version = "0.0.1-beta",
+      version = "0.0.2-beta",
       author="Kamuri Amorim",
       author_email='luiz.k.amorim@gmail.com',
       url="https://github.com/kamuridesu/KamTube",
@@ -25,7 +25,7 @@ setup(name="KamTube",
       install_requires=["aiohttp==3.8.1", "beautifulsoup4==4.8.2"],
       entry_points={
         'console_scripts':[
-            'kamtube=KamTube.cli.main'
+            'kamtube=KamTube.cli:main'
         ]
       }
 )
