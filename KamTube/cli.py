@@ -98,7 +98,8 @@ async def argparse():
 def main():
     try:
         loop = asyncio.get_event_loop()
-        loop.create_task(argparse())
+        task = loop.create_task(argparse())
+        loop.run_until_complete(asyncio.gather(task))
         loop.run_forever()
     except KeyboardInterrupt:
         print("Cancelled by the user!")
