@@ -27,6 +27,8 @@ async def post(session: aiohttp.ClientSession, url: str, data: str, headers: dic
             buffer += raw_data
             if not end_of_http_chunk:
                 continue
+        if is_cli:
+            print()
         return buffer
 
 

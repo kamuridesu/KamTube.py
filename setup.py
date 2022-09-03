@@ -13,7 +13,7 @@ def requirements():
 
 
 setup(name="KamTube",
-      version = "0.0.2-beta",
+      version = "0.0.1",
       author="Kamuri Amorim",
       author_email='luiz.k.amorim@gmail.com',
       url="https://github.com/kamuridesu/KamTube",

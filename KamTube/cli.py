@@ -89,9 +89,17 @@ async def argparse():
     cli = CLI(extract)
     if direct:
         await cli.directDownload(" ".join(query_args))
+        raise SystemExit
     else:
         await cli.interactiveSearch(" ".join(query_args))
+        raise SystemExit
 
 
 def main():
-    asyncio.run(argparse())
+    try:
+        loop = asyncio.get_event_loop()
+        loop.create_task(argparse())
+        loop.run_forever()
+    except KeyboardInterrupt:
+        print("Cancelled by the user!")
+        sys.exit(1)
