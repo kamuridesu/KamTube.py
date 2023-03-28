@@ -2,12 +2,12 @@ import aiohttp
 import asyncio
 
 
-def progress(count, total, suffix=''):
+def progress(count, total, suffix=""):
     length = 40
     filled_len = int(round(length * count / float(total)))
     percents = round(100 * count / float(total), 1)
-    bar = '=' * filled_len + '-' * (length - filled_len)
-    print('[%s] %s%s ...%s\r' % (bar, percents, '%', suffix), flush=True, end="")
+    bar = "=" * filled_len + "-" * (length - filled_len)
+    print("[%s] %s%s ...%s\r" % (bar, percents, "%", suffix), flush=True, end="")
 
 
 async def get(session: aiohttp.ClientSession, url: str) -> bytes:
@@ -15,7 +15,14 @@ async def get(session: aiohttp.ClientSession, url: str) -> bytes:
         return await resp.read()
 
 
-async def post(session: aiohttp.ClientSession, url: str, data: str, headers: dict={}, is_cli: bool=False, title: str="") -> bytes:
+async def post(
+    session: aiohttp.ClientSession,
+    url: str,
+    data: str,
+    headers: dict = {},
+    is_cli: bool = False,
+    title: str = "",
+) -> bytes:
     async with session.request("POST", url, data=data, headers=headers) as resp:
         total_content_length = int(resp.headers.get("Content-Length"))
         buffer = b""
@@ -34,4 +41,5 @@ async def post(session: aiohttp.ClientSession, url: str, data: str, headers: dic
 
 if __name__ == "__main__":
     import asyncio
+
     loop = asyncio.get_event_loop()

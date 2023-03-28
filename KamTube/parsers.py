@@ -28,7 +28,7 @@ def parse(document: str) -> dict[str, Union[str, list]]:
         "mixed": [],
         "audio": [],
         "video": [],
-        "subs": []
+        "subs": [],
     }
     for item in select.find_all("option"):
         if "video only" in item.text:
@@ -41,25 +41,20 @@ def parse(document: str) -> dict[str, Union[str, list]]:
                 "quality": resolution,
                 "fps": fps,
                 "extension": extension,
-                "query": item['value']
+                "query": item["value"],
             }
-            media_informations['video'].append(data)
+            media_informations["video"].append(data)
         elif "audio only" in item.text:
             splitted = item.text.strip().split(" - ")
             extension_quality = splitted[0].split(" @ ")
             extension = extension_quality[0].split("/")[1]
             quality = float(extension_quality[1].replace("k", ""))
-            data = {
-                "quality": quality,
-                "extension": extension,
-                "query": item['value']
-            }
-            media_informations['audio'].append(data)
+            data = {"quality": quality, "extension": extension, "query": item["value"]}
+            media_informations["audio"].append(data)
         elif "Subtitles" in item.text:
-            media_informations['subs'].append({
-                "language": item.text.strip().split(" - ")[1],
-                "query": item['value']
-                })
+            media_informations["subs"].append(
+                {"language": item.text.strip().split(" - ")[1], "query": item["value"]}
+            )
         else:
             splitted = item.text.strip().split(" - ")
             resolution = int(splitted[0].replace("p", ""))
@@ -67,7 +62,7 @@ def parse(document: str) -> dict[str, Union[str, list]]:
             data = {
                 "quality": resolution,
                 "extension": extension,
-                "query": item['value']
+                "query": item["value"],
             }
-            media_informations['mixed'].append(data)
+            media_informations["mixed"].append(data)
     return media_informations
