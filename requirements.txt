@@ -4,7 +4,7 @@
 #
 #    pip-compile pyproject.toml
 #
-aiohttp==3.8.5
+aiohttp==3.8.6
     # via KamTube (pyproject.toml)
 aiosignal==1.2.0
     # via aiohttp
